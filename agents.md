@@ -17,3 +17,15 @@ This is a PlatformIO project for an embedded system, an ESP32-based device with 
 *   **Configuration:** The `platformio.ini` file defines the project's dependencies, build flags, and board configuration. The `include/wifi_config.h` file holds Wi-Fi credentials.
 
 In summary, this is a feature-rich embedded application for an ESP32 device with a touchscreen, providing a local graphical interface and remote web-based interaction.
+
+## Latest maintenance notes
+
+* Code is split into focused modules under `src/`:
+  * `display.*` sets up LVGL, the CYD display, and the touch stub.
+  * `wifi_manager.*` handles Wi-Fi connection and reconnection loops.
+  * `http_server.*` hosts the configuration UI and persists the endpoint setting.
+  * `input.*` reads keypad input and converts it to flame status values.
+  * `lighting.*` and `audio.*` are ready-made extension points for WS2812 and speaker behavior.
+  * `utils.*` holds small shared helpers like HTML escaping.
+* `src/main.cpp` now orchestrates the system by calling into the modules above so features can evolve independently.
+* Keep future changes similarly well-commented so new contributors can navigate the firmware quickly.
