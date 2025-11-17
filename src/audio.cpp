@@ -1,11 +1,10 @@
-#include "audio.h"
+#include "audio_module.h"
+
+#include <Audio.h>
+#include <I2S.h>
 
 #include <algorithm>
 #include <cmath>
-
-#include <I2S.h>
-
-#include "driver/i2s.h"
 
 namespace
 {
@@ -15,25 +14,24 @@ constexpr uint32_t kSampleRateHz = 16000;
 constexpr float kToneAmplitude = 120.0f; // 8-bit DAC amplitude headroom, shifted into MSB for I2S
 constexpr double kTwoPi = 6.283185307179586;
 
-I2SClass dacI2S(I2S_NUM_0);
-
 bool configureBuiltInDac()
 {
     // Use the Arduino I2S wrapper so the sketch relies on the standard PlatformIO
     // library instead of the raw ESP-IDF driver calls.
-    if (!dacI2S.begin(I2S_MODE_DAC_BUILT_IN,
-                      kSampleRateHz,
-                      I2S_BITS_PER_SAMPLE_16BIT,
-                      I2S_CHANNEL_FMT_ONLY_LEFT))
+    if (!I2S.begin(I2S_MODE_DAC_BUILT_IN,
+                   kSampleRateHz,
+                   I2S_BITS_PER_SAMPLE_16BIT,
+                   I2S_CHANNEL_FMT_ONLY_LEFT))
     {
         Serial.println("Failed to start I2S for DAC output");
         return false;
     }
 
-    // Route the startup tone through the CYD's amplified DAC on GPIO 26.
-    dacI2S.setPins(I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, 26, I2S_PIN_NO_CHANGE);
-    i2s_set_dac_mode(I2S_DAC_CHANNEL_LEFT_EN);
-    dacI2S.flush();
+    // Route the startup tone through the CYD's amplified DAC on GPIO 26 using the
+    // Arduino I2S helper and its DAC mode configuration.
+    I2S.setPins(I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE);
+    I2S.setDACMode(I2S_DAC_CHANNEL_LEFT_EN);
+    I2S.flush();
 
     return true;
 }
@@ -60,10 +58,10 @@ void playStartupTone()
             buffer[i] = sample;
         }
 
-        dacI2S.write(reinterpret_cast<uint8_t *>(buffer), samplesThisChunk * sizeof(uint16_t));
+        I2S.write(reinterpret_cast<uint8_t *>(buffer), samplesThisChunk * sizeof(uint16_t));
     }
 
-    dacI2S.end();
+    I2S.end();
 }
 
 void updateAudioForStatus(const String &status)

@@ -5,7 +5,7 @@
 #include <ui.h>
 #include <WiFi.h>
 
-#include "audio.h"
+#include "audio_module.h"
 #include "display.h"
 #include "http_server.h"
 #include "input.h"
