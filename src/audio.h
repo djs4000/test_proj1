@@ -3,3 +3,4 @@
 #include <Arduino.h>
 
 void updateAudioForStatus(const String &status);
+void playStartupTone();

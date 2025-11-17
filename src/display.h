@@ -6,3 +6,4 @@
 extern TFT_eSPI tft;
 
 void initializeDisplay();
+void showStartupStatus(const String &wifiStatus);

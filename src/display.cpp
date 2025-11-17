@@ -92,3 +92,20 @@ void initializeDisplay()
     indev_drv.read_cb = my_touchpad_read;
     lv_indev_drv_register(&indev_drv);
 }
+
+void showStartupStatus(const String &wifiStatus)
+{
+    tft.fillScreen(TFT_BLACK);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextSize(2);
+
+    tft.setCursor(12, 40);
+    tft.println("Starting up...");
+
+    tft.setTextSize(1);
+    tft.setCursor(12, 80);
+    tft.println("WiFi status:");
+    tft.setTextSize(2);
+    tft.setCursor(12, 100);
+    tft.println(wifiStatus);
+}

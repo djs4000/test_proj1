@@ -10,7 +10,7 @@ constexpr uint8_t kMaxConnectionAttempts = 20;
 constexpr uint16_t kRetryDelayMs = 500;
 }
 
-void connectToWifi()
+bool connectToWifi()
 {
     Serial.printf("Connecting to %s", WIFI_SSID);
     WiFi.mode(WIFI_STA);
@@ -29,11 +29,13 @@ void connectToWifi()
         Serial.println();
         Serial.print("WiFi connected. IP address: ");
         Serial.println(WiFi.localIP());
+        return true;
     }
     else
     {
         Serial.println();
         Serial.println("Failed to connect to WiFi. Check credentials and signal strength.");
+        return false;
     }
 }
 
@@ -41,7 +43,10 @@ void maintainWifiConnection()
 {
     if (WiFi.status() != WL_CONNECTED)
     {
-        connectToWifi();
-        delay(1500);
+        const bool connected = connectToWifi();
+        if (!connected)
+        {
+            delay(1500);
+        }
     }
 }
