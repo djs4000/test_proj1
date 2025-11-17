@@ -5,6 +5,7 @@
 
 #include "ui.h"
 
+lv_obj_t * uic_Bar2;
 lv_obj_t * ui_Screen1 = NULL;
 lv_obj_t * ui_Image2 = NULL;
 lv_obj_t * ui_Bar2 = NULL;
@@ -13,8 +14,11 @@ void ui_event_Screen1(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
+    if(event_code == LV_EVENT_SCREEN_LOAD_START) {
+        _ui_bar_set_property(ui_Bar2, _UI_BAR_PROPERTY_VALUE_WITH_ANIM, 100);
+    }
     if(event_code == LV_EVENT_SCREEN_LOADED) {
-        _ui_bar_increment(ui_Bar2, 100, LV_ANIM_ON);
+        _ui_screen_change(&ui_Screen2, LV_SCR_LOAD_ANIM_FADE_ON, 500, 1500, &ui_Screen2_screen_init);
     }
 }
 
@@ -39,9 +43,15 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_x(ui_Bar2, -4);
     lv_obj_set_y(ui_Bar2, 115);
     lv_obj_set_align(ui_Bar2, LV_ALIGN_CENTER);
+    lv_obj_set_style_bg_color(ui_Bar2, lv_color_hex(0xFDD5BA), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Bar2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_anim_time(ui_Bar2, 1000, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    lv_obj_set_style_bg_color(ui_Bar2, lv_color_hex(0xFF812C), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Bar2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
     lv_obj_add_event_cb(ui_Screen1, ui_event_Screen1, LV_EVENT_ALL, NULL);
+    uic_Bar2 = ui_Bar2;
 
 }
 
@@ -52,6 +62,7 @@ void ui_Screen1_screen_destroy(void)
     // NULL screen variables
     ui_Screen1 = NULL;
     ui_Image2 = NULL;
+    uic_Bar2 = NULL;
     ui_Bar2 = NULL;
 
 }

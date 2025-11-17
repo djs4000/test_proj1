@@ -18,6 +18,7 @@ extern lv_obj_t * ui_Screen1;
 extern lv_obj_t * ui_Image2;
 extern lv_obj_t * ui_Bar2;
 // CUSTOM VARIABLES
+extern lv_obj_t * uic_Bar2;
 
 #ifdef __cplusplus
 } /*extern "C"*/
