@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <I2S.h>
+
 #include "driver/i2s.h"
 
 namespace
@@ -13,34 +15,25 @@ constexpr uint32_t kSampleRateHz = 16000;
 constexpr float kToneAmplitude = 120.0f; // 8-bit DAC amplitude headroom, shifted into MSB for I2S
 constexpr double kTwoPi = 6.283185307179586;
 
+I2SClass dacI2S(I2S_NUM_0);
+
 bool configureBuiltInDac()
 {
-    const i2s_config_t config = {
-        .mode = static_cast<i2s_mode_t>(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_DAC_BUILT_IN),
-        .sample_rate = static_cast<int>(kSampleRateHz),
-        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-        .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-        .communication_format = I2S_COMM_FORMAT_STAND_MSB,
-        .intr_alloc_flags = 0,
-        .dma_buf_count = 4,
-        .dma_buf_len = 256,
-        .use_apll = false,
-        .tx_desc_auto_clear = true,
-        .fixed_mclk = 0,
-        .mclk_multiple = I2S_MCLK_MULTIPLE_DEFAULT,
-        .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT,
-    };
-
-    if (i2s_driver_install(I2S_NUM_0, &config, 0, nullptr) != ESP_OK)
+    // Use the Arduino I2S wrapper so the sketch relies on the standard PlatformIO
+    // library instead of the raw ESP-IDF driver calls.
+    if (!dacI2S.begin(I2S_MODE_DAC_BUILT_IN,
+                      kSampleRateHz,
+                      I2S_BITS_PER_SAMPLE_16BIT,
+                      I2S_CHANNEL_FMT_ONLY_LEFT))
     {
-        Serial.println("Failed to install I2S driver for DAC output");
+        Serial.println("Failed to start I2S for DAC output");
         return false;
     }
 
     // Route the startup tone through the CYD's amplified DAC on GPIO 26.
+    dacI2S.setPins(I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, 26, I2S_PIN_NO_CHANGE);
     i2s_set_dac_mode(I2S_DAC_CHANNEL_LEFT_EN);
-    i2s_set_sample_rates(I2S_NUM_0, kSampleRateHz);
-    i2s_zero_dma_buffer(I2S_NUM_0);
+    dacI2S.flush();
 
     return true;
 }
@@ -67,11 +60,10 @@ void playStartupTone()
             buffer[i] = sample;
         }
 
-        size_t bytesWritten = 0;
-        i2s_write(I2S_NUM_0, buffer, samplesThisChunk * sizeof(uint16_t), &bytesWritten, portMAX_DELAY);
+        dacI2S.write(reinterpret_cast<uint8_t *>(buffer), samplesThisChunk * sizeof(uint16_t));
     }
 
-    i2s_driver_uninstall(I2S_NUM_0);
+    dacI2S.end();
 }
 
 void updateAudioForStatus(const String &status)
