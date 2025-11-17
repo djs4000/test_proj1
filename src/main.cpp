@@ -30,6 +30,7 @@ void setup()
     const String wifiStatusText = wifiConnected ? "Connected: " + WiFi.localIP().toString() : "Failed to connect";
     showStartupStatus(wifiStatusText);
     playStartupTone();
+    delay(3000);
     ui_init();
     initializeKeypad();
 

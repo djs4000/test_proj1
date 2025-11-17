@@ -2,7 +2,8 @@
 
 namespace
 {
-constexpr uint8_t kBuzzerPin = 25;
+// The CYD routes its built-in amplified DAC output to GPIO 26.
+constexpr uint8_t kBuzzerPin = 26;
 constexpr uint8_t kBuzzerChannel = 0;
 constexpr uint16_t kStartupToneDurationMs = 200;
 constexpr double kStartupToneFrequencyHz = 2000.0;
