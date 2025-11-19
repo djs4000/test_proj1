@@ -11,6 +11,12 @@
 #include "lighting.h"
 #include "wifi_manager.h"
 
+namespace
+{
+constexpr uint16_t kKeypadPollIntervalMs = 100;
+unsigned long s_lastKeypadPollMs = 0;
+}
+
 Preferences preferences;
 String endpointConfig;
 String flameStatus = "On";
@@ -38,15 +44,19 @@ void loop()
     handleHttpServer();
     maintainWifiConnection();
 
-    const String newStatus = readFlameStatusFromKeypad(flameStatus);
-    if (newStatus != flameStatus)
+    const unsigned long now = millis();
+    if (now - s_lastKeypadPollMs >= kKeypadPollIntervalMs)
     {
-        flameStatus = newStatus;
-        Serial.print("Flame status: ");
-        Serial.println(flameStatus);
-        updateLightingForStatus(flameStatus);
-        updateAudioForStatus(flameStatus);
-    }
+        s_lastKeypadPollMs = now;
 
-    delay(100);
+        const String newStatus = readFlameStatusFromKeypad(flameStatus);
+        if (newStatus != flameStatus)
+        {
+            flameStatus = newStatus;
+            Serial.print("Flame status: ");
+            Serial.println(flameStatus);
+            updateLightingForStatus(flameStatus);
+            updateAudioForStatus(flameStatus);
+        }
+    }
 }

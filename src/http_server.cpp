@@ -9,6 +9,9 @@ namespace
 WebServer server(80);
 Preferences *preferencesPtr = nullptr;
 String *endpointConfigPtr = nullptr;
+constexpr uint16_t kRestartGracePeriodMs = 500;
+bool restartPending = false;
+unsigned long restartRequestedMs = 0;
 
 void sendConfigurationPage(const String &message = String())
 {
@@ -47,8 +50,8 @@ void handleSave()
 void handleRestart()
 {
     server.send(200, "text/html", F("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>Restarting</title></head><body><h1>Device Restarting</h1><p>The device will restart to apply the new settings.</p></body></html>"));
-    delay(500);
-    ESP.restart();
+    restartPending = true;
+    restartRequestedMs = millis();
 }
 }
 
@@ -66,4 +69,10 @@ void initializeHttpServer(Preferences &preferences, String &endpointConfig)
 void handleHttpServer()
 {
     server.handleClient();
+
+    if (restartPending && millis() - restartRequestedMs >= kRestartGracePeriodMs)
+    {
+        restartPending = false;
+        ESP.restart();
+    }
 }
